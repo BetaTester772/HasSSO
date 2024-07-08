@@ -2,6 +2,7 @@
     import {onMount} from 'svelte';
 
     let redirectUrl = '';
+    let onProgress = false;
 
     onMount(() => {
         const params = new URLSearchParams(window.location.search);
@@ -13,6 +14,10 @@
 
     async function signIn(username, password, url) {
         console.log(url);
+        onProgress = true;
+        if (url === 'null') {
+            url = window.location.origin;
+        }
         try {
             const response = await fetch('http://localhost:8000/api/v1/auth/verify', {
                 method: 'POST',
@@ -42,6 +47,8 @@
         } catch (error) {
             console.error('Sign in error:', error);
             alert('An error occurred. Please try again later.');
+        } finally {
+            onProgress = false;
         }
     }
 </script>
@@ -68,9 +75,8 @@
                     <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Hana Intranet
                         Password</label>
                     <div class="text-sm">
-                        <a href="https://hi.hana.hs.kr/member/pop_idpw_search.asp" target="popup"
-                           onclick="window.open('https://hi.hana.hs.kr/member/pop_idpw_search.asp','popup','width=600,height=600,scrollbars=no,resizable=no'); return false;"
-                           class="font-semibold text-hana-600 hover:text-hana-500">Forgot password?</a>
+                        <a href="/update?redirect={redirectUrl}"
+                           class="font-semibold text-hana-600 hover:text-hana-500">Password changed?</a>
                     </div>
                 </div>
                 <div class="mt-2">
@@ -80,16 +86,23 @@
             </div>
 
             <div>
-                <button type="submit"
-                        class="flex w-full justify-center rounded-md bg-hana-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-hana-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hana-600">
-                    Sign in
+                <button type="submit" id="create-account"
+                        class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm {onProgress ? 'bg-gray-400 cursor-not-allowed' : 'bg-hana-600 hover:bg-hana-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hana-600'}"
+                        disabled={onProgress}>
+                    {#if onProgress}
+                        Processing...
+                    {/if}
+                    {#if !onProgress}
+                        Sign in
+                    {/if}
                 </button>
+
             </div>
         </form>
 
         <p class="mt-10 text-center text-sm text-gray-500">
             Not a member?
-            <a href="https://hi.hana.hs.kr/member/step1.asp"
+            <a href="/create?redirect={redirectUrl}"
                class="font-semibold leading-6 text-hana-600 hover:text-hana-500">Sign up</a>
         </p>
     </div>

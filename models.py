@@ -3,7 +3,17 @@ from sqlmodel import Field, SQLModel
 
 
 class User(SQLModel, table=True):
-    id = Field(default=None, primary_key=True, index=True)
+    id: int = Field(default=None, primary_key=True, index=True)
 
-    key = Field(default=None)
-    student_id = Field(default=None)
+    key: str = Field(default=None)
+    student_id: int = Field(default=None, unique=True)
+    intranet_id: str = Field(default=None, unique=True)
+    name: str = Field(default=None)
+
+
+class Site(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True, index=True)
+    name: str = Field(default=None)
+    url: str = Field(default=None)
+    description: str = Field(default=None)
+    secret_key: str = Field(default=None)

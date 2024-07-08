@@ -17,7 +17,7 @@
         console.log(url);
         onProgress = true;
         try {
-            const response = await fetch('http://localhost:8000/api/v1/user/create', {
+            const response = await fetch('http://localhost:8000/api/v1/user/update', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -32,6 +32,7 @@
             const data = await response.json();
 
             if (response.ok) {
+                alert('Account updated successfully. Please sign in to continue.')
                 window.location.href = '/login?redirect=' + url;
             } else {
                 console.error('Sign in failed with status:', response.status, response.statusText);
@@ -78,14 +79,18 @@
                 <button type="submit" id="create-account"
                         class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm {onProgress ? 'bg-gray-400 cursor-not-allowed' : 'bg-hana-600 hover:bg-hana-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hana-600'}"
                         disabled={onProgress}>
-                {#if onProgress}
-                    Processing...
-                {/if}
-                {#if !onProgress}
-                    Sign up
-                {/if}
+                    {#if onProgress}
+                        Processing...
+                    {/if}
+                    {#if !onProgress}
+                        Update
+                    {/if}
                 </button>
             </div>
         </form>
+        <p class="mt-10 text-center text-sm text-gray-500">
+            Do you have an account? <a href="/login?redirect={redirectUrl}"
+               class="font-semibold leading-6 text-hana-600 hover:text-hana-500">Sign in</a>
+        </p>
     </div>
 </div>

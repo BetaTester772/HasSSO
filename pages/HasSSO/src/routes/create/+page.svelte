@@ -1,7 +1,9 @@
 <script>
     import {onMount} from 'svelte';
+    import {bounceIn} from "svelte/easing";
 
     let redirectUrl = '';
+    let onProgress = false;
 
     onMount(() => {
         const params = new URLSearchParams(window.location.search);
@@ -11,10 +13,11 @@
 
     // http://localhost:5173/?redirect=http://localhost:5173/
 
-    async function signIn(username, password, url) {
+    async function signUp(username, password, url) {
         console.log(url);
+        onProgress = true;
         try {
-            const response = await fetch('http://localhost:8000/api/v1/auth/verify', {
+            const response = await fetch('http://localhost:8000/api/v1/user/create', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -23,38 +26,41 @@
                 body: JSON.stringify({
                     intranet_id: username,
                     intranet_pw: password,
-                    site_url: url
-
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                const token = data.temp_token; // Assuming the token is in the 'token' field of the response
-                // Save token to local storage or cookies if needed
-                // localStorage.setItem('token', token);
-                window.location.href = url + '?token=' + token;
+                alert('Account created successfully. Please sign in to continue.')
+                window.location.href = '/login?redirect=' + url;
             } else {
                 console.error('Sign in failed with status:', response.status, response.statusText);
-                alert(data.detail || 'An error occurred in the sign in process. Please try again later.');
+                if (response.status === 409) {
+                    alert('이미 가입된 계정입니다. 로그인 페이지로 이동합니다.')
+                    window.location.href = '/login?redirect=' + url;
+                } else {
+                    alert(data.detail || 'An error occurred in the sign in process. Please try again later.');
+                }
             }
         } catch (error) {
             console.error('Sign in error:', error);
             alert('An error occurred. Please try again later.');
+        } finally {
+            onProgress = false;
         }
     }
 </script>
 
 <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign in to your HaSSO
+        <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Create your HaSSO
             account</h2>
     </div>
 
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form class="space-y-6" action="#" method="POST"
-              on:submit|preventDefault="{() => signIn(username.value, password.value, redirectUrl)}">
+              on:submit|preventDefault="{() => signUp(username.value, password.value, redirectUrl)}">
             <div>
                 <label for="username" class="block text-sm font-medium leading-6 text-gray-900">Hana Intranet Id</label>
                 <div class="mt-2">
@@ -67,11 +73,6 @@
                 <div class="flex items-center justify-between">
                     <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Hana Intranet
                         Password</label>
-                    <div class="text-sm">
-                        <a href="https://hi.hana.hs.kr/member/pop_idpw_search.asp" target="popup"
-                           onclick="window.open('https://hi.hana.hs.kr/member/pop_idpw_search.asp','popup','width=600,height=600,scrollbars=no,resizable=no'); return false;"
-                           class="font-semibold text-hana-600 hover:text-hana-500">Password changed?</a>
-                    </div>
                 </div>
                 <div class="mt-2">
                     <input id="password" name="password" type="password" autocomplete="current-password" required
@@ -80,17 +81,21 @@
             </div>
 
             <div>
-                <button type="submit"
-                        class="flex w-full justify-center rounded-md bg-hana-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-hana-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hana-600">
-                    Sign in
+                <button type="submit" id="create-account"
+                        class="flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm {onProgress ? 'bg-gray-400 cursor-not-allowed' : 'bg-hana-600 hover:bg-hana-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hana-600'}"
+                        disabled={onProgress}>
+                    {#if onProgress}
+                        Processing...
+                    {/if}
+                    {#if !onProgress}
+                        Sign up
+                    {/if}
                 </button>
             </div>
         </form>
-
         <p class="mt-10 text-center text-sm text-gray-500">
-            Not a member?
-            <a href="https://hi.hana.hs.kr/member/step1.asp"
-               class="font-semibold leading-6 text-hana-600 hover:text-hana-500">Sign up</a>
+            Do you have an account? <a href="/login?redirect={redirectUrl}"
+                                       class="font-semibold leading-6 text-hana-600 hover:text-hana-500">Sign in</a>
         </p>
     </div>
 </div>

@@ -1,9 +1,12 @@
 from sqlmodel import SQLModel, create_engine, Session
 
-database_file = 'my_website.db'
-database_connection_string = f"sqlite:///{database_file}"
+# get database connection string from .env file
+from starlette.config import Config
 
-engine_url = create_engine(database_connection_string, echo=True)
+config = Config('.env')
+database_connection_string = config('SQLALCHEMY_DATABASE_URL')
+
+engine_url = create_engine(database_connection_string, echo=False)
 
 
 def conn():
