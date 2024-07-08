@@ -17,7 +17,7 @@
         console.log(url);
         onProgress = true;
         try {
-            const response = await fetch('http://localhost:8000/api/v1/user/update', {
+            const response = await fetch('https://ssoapi.betatester772.dev/api/v1/user/update', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',

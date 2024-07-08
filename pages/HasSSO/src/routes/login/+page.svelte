@@ -19,7 +19,7 @@
             url = window.location.origin;
         }
         try {
-            const response = await fetch('http://localhost:8000/api/v1/auth/verify', {
+            const response = await fetch('https://ssoapi.betatester772.dev/api/v1/auth/verify', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
