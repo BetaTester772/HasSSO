@@ -109,3 +109,7 @@ def verify_student(verify: Verify, db: Session = Depends(get_session)):
                                        "expire"    : datetime.datetime.now() + datetime.timedelta(minutes=5)}
 
     return {"temp_token": temp_token}
+
+@router.get("/check", status_code=status.HTTP_204_NO_CONTENT)
+def verify_student():
+    return
