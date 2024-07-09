@@ -110,6 +110,6 @@ def verify_student(verify: Verify, db: Session = Depends(get_session)):
 
     return {"temp_token": temp_token}
 
-@router.get("/check", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/check", status_code=status.HTTP_204_NO_CONTENT)
 def verify_student():
     return
