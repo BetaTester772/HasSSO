@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_session
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Optional
 from pydantic import BaseModel
@@ -110,6 +110,24 @@ def verify_student(verify: Verify, db: Session = Depends(get_session)):
 
     return {"temp_token": temp_token}
 
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+
+
+def verify_token(request: Request, token: str = Depends(oauth2_scheme), db: Session = Depends(get_session)):
+    try:
+        site = request.query_params.get("site")
+        if not site:
+            raise HTTPException(status_code=400, detail="Site parameter is missing")
+        SECRET_KEY = get_secret_key(db, site)
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
 @router.post("/check", status_code=status.HTTP_204_NO_CONTENT)
-def verify_student():
-    return
+def verify_student(payload=Depends(verify_token)):
+    return payload
